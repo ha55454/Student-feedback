@@ -1,0 +1,44 @@
+pipeline {
+
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "husna615/student-feedback-app"
+    }
+
+    stages {
+
+        stage('Code Fetch') {
+            steps {
+                git 'https://github.com/ha55454/Student-feedback'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t $DOCKER_IMAGE .'
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
+
+                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                    sh 'docker push $DOCKER_IMAGE'
+                }
+            }
+        }
+
+        stage('Kubernetes Deploy') {
+            steps {
+                sh 'kubectl apply -f mysql-deployment.yaml'
+                sh 'kubectl apply -f app-deployment.yaml'
+            }
+        }
+    }
+}
