@@ -4,6 +4,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "husna615/student-feedback-app"
+        KUBECONFIG = "/var/lib/jenkins/.kube/config"
     }
 
     stages {
@@ -27,10 +28,22 @@ pipeline {
             }
         }
 
-        stage('Kubernetes Deploy') {
+        stage('Kubernetes Deploy - DB') {
             steps {
                 sh 'kubectl apply -f mysql-deployment.yaml --validate=false'
+            }
+        }
+
+        stage('Kubernetes Deploy - App') {
+            steps {
                 sh 'kubectl apply -f app-deployment.yaml --validate=false'
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh 'kubectl get pods'
+                sh 'kubectl get svc'
             }
         }
     }
