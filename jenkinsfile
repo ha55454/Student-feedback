@@ -8,12 +8,6 @@ pipeline {
 
     stages {
 
-        stage('Code Fetch') {
-            steps {
-                git 'https://github.com/ha55454/Student-feedback'
-            }
-        }
-
         stage('Docker Build') {
             steps {
                 sh 'docker build -t $DOCKER_IMAGE .'
